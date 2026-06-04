@@ -873,7 +873,8 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Overseerr
             {
                 var notificationSettings = await GetUserNotificationSettings(overseerrUserID);
 
-                if (notificationSettings.DiscordID != null && notificationSettings.DiscordID.Equals(userId, StringComparison.InvariantCultureIgnoreCase))
+                if (notificationSettings.DiscordID != null && notificationSettings.DiscordID.Equals(userId, StringComparison.InvariantCultureIgnoreCase)
+                    || notificationSettings.DiscordIds != null && notificationSettings.DiscordIds.Contains(userId))
                 {
                     return true;
                 }
@@ -896,7 +897,8 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Overseerr
                 {
                     var notificationSettings = await GetUserNotificationSettings(user.ID);
 
-                    if (notificationSettings.DiscordID != null && notificationSettings.DiscordID.Equals(userId, StringComparison.InvariantCultureIgnoreCase))
+                    if (notificationSettings.DiscordID != null && notificationSettings.DiscordID.Equals(userId, StringComparison.InvariantCultureIgnoreCase)
+                        || notificationSettings.DiscordIds != null && notificationSettings.DiscordIds.Contains(userId))
                     {
                         _requesterIdToOverseerUserID[userId] = user.ID;
                         _requesterIdToOverseerDisplayName[userId] = user.DisplayName;
@@ -1243,6 +1245,9 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Overseerr
         {
             [JsonProperty("discordId")]
             public string DiscordID { get; set; }
+            
+            [JsonProperty("discordIds")]
+            public string[] DiscordIds { get; set; }
         }
 
         public class JSONUserResult
