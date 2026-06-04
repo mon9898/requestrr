@@ -1244,10 +1244,10 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Overseerr
         public class JSONUserNotificationSettings
         {
             [JsonProperty("discordId")]
-            public string DiscordID { get; set; }
-            
+            public string DiscordID { get; set; } = null;
+
             [JsonProperty("discordIds")]
-            public string[] DiscordIds { get; set; }
+            public string[] DiscordIds { get; set; } = null;
         }
 
         public class JSONUserResult
