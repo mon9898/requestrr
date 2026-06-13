@@ -329,7 +329,7 @@ namespace Requestrr.WebApi.RequestrrBot.ChatClients.Discord
 
         private async Task TvShowSelection(string customId, TvShowRequest request, IReadOnlyList<SearchedTvShow> searchedTvShows)
         {
-            var options = searchedTvShows.Take(15).Select(x => new DiscordSelectComponentOption(GetFormatedTvShowTitle(x), $"{request.CategoryId}/{x.TheTvDbId.ToString()}")).ToList();
+            var options = searchedTvShows.Take(25).Select(x => new DiscordSelectComponentOption(GetFormatedTvShowTitle(x), $"{request.CategoryId}/{x.TheTvDbId.ToString()}")).ToList();
             var select = new DiscordSelectComponent($"{customId}/{_interactionContext.User.Id}/{request.CategoryId}", LimitStringSize(Language.Current.DiscordCommandTvRequestHelpSearchDropdown), options);
 
             await _interactionContext.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddComponents(select).WithContent(Language.Current.DiscordCommandTvRequestHelpSearch));

@@ -188,7 +188,7 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
         {
             try
             {
-                var searchTerm = Uri.EscapeDataString(tvShowName.ToLower().Trim().Replace(" ", "+"));
+                var searchTerm = Uri.EscapeDataString(tvShowName.ToLower().Trim());
                 var response = await HttpGetAsync($"{BaseURL}/series/lookup?term={searchTerm}");
                 await response.ThrowIfNotSuccessfulAsync("SonarrSeriesLookup failed", x => x.message);
                 var jsonResponse = await response.Content.ReadAsStringAsync();
