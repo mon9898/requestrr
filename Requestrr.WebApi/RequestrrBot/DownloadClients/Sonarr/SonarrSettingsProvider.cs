@@ -1,4 +1,6 @@
-﻿namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
+﻿using System;
+
+namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
 {
     public class SonarrSettingsProvider
     {
