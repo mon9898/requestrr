@@ -10,6 +10,7 @@ using Requestrr.WebApi.RequestrrBot.ChatClients.Discord;
 using Requestrr.WebApi.RequestrrBot.Movies;
 using Requestrr.WebApi.RequestrrBot.TvShows;
 using Requestrr.WebApi.RequestrrBot.Music;
+using Requestrr.WebApi.RequestrrBot.Anime;
 using Requestrr.WebApi.RequestrrBot.Locale;
 using System.Collections.Generic;
 
@@ -124,6 +125,48 @@ namespace Requestrr.WebApi.RequestrrBot
             [TVDB_COMMAND_END]
             [TV_COMMAND_END]
 
+
+            [ANIME_COMMAND_START]
+            [SlashCommand("[REQUEST_ANIME_TITLE_NAME]", "[REQUEST_ANIME_TITLE_DESCRIPTION]")]
+            [RequireRoles(new ulong[] { [REQUIRED_ANIME_ROLE_IDS] })]
+            [RequireChannels(new ulong[] { [REQUIRED_CHANNEL_IDS] })]
+            public async Task AnimeByTitle[ANIME_CATEGORY_ID](InteractionContext ctx, [Option("[REQUEST_ANIME_TITLE_OPTION_NAME]", "[REQUEST_ANIME_TITLE_OPTION_DESCRIPTION]")] string animeTitle)
+            {
+                try
+                {
+                    var settings = _serviceProvider.Get<DiscordSettingsProvider>().Provide();
+                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(settings.AutomaticallyPurgeCommandMessages).WithContent(Language.Current.DiscordCommandSending));
+
+                    var workFlow = _serviceProvider.Get<AnimeWorkflowFactory>().CreateRequestingWorkflow(ctx.Interaction, [ANIME_CATEGORY_ID]);
+                    await workFlow.SearchTvShowAsync(animeTitle.Trim());
+                }
+                catch (System.Exception ex)
+                {
+                    _logger.LogError(ex, $"Error while searching anime with title {animeTitle} : " + ex.Message);
+                }
+            }
+
+            [ANIMETVDB_COMMAND_START]
+            [SlashCommand("[REQUEST_ANIME_TVDB_NAME]", "[REQUEST_ANIME_TVDB_DESCRIPTION]")]
+            [RequireRoles(new ulong[] { [REQUIRED_ANIME_ROLE_IDS] })]
+            [RequireChannels(new ulong[] { [REQUIRED_CHANNEL_IDS] })]
+            public async Task AnimeByTvdb[ANIME_CATEGORY_ID](InteractionContext ctx, [Option("[REQUEST_ANIME_TVDB_OPTION_NAME]", "[REQUEST_ANIME_TVDB_OPTION_DESCRIPTION]")] long tvDbId)
+            {
+                try
+                {
+                    var settings = _serviceProvider.Get<DiscordSettingsProvider>().Provide();
+                    await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AsEphemeral(settings.AutomaticallyPurgeCommandMessages).WithContent(Language.Current.DiscordCommandSending));
+
+                    var workFlow = _serviceProvider.Get<AnimeWorkflowFactory>().CreateRequestingWorkflow(ctx.Interaction, [ANIME_CATEGORY_ID]);
+                    await workFlow.SearchTvShowAsync((int)tvDbId);
+                }
+                catch (System.Exception ex)
+                {
+                    _logger.LogError(ex, $"Error while searching anime with tvdb id {tvDbId} : " + ex.Message);
+                }
+            }
+            [ANIMETVDB_COMMAND_END]
+            [ANIME_COMMAND_END]
 
             [MUSIC_COMMAND_START]
             [SlashCommand("[REQUEST_MUSIC_ARTIST_NAME]", "[REQUEST_MUSIC_ARTIST_DESCRIPTION]")]

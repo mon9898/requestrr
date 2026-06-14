@@ -293,7 +293,7 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
 
             try
             {
-                category = SonarrSettings.Categories.Single(x => x.Id == request.CategoryId);
+                category = SonarrSettings.Categories.Concat(SonarrSettings.AnimeCategories).Single(x => x.Id == request.CategoryId);
             }
             catch
             {
@@ -385,7 +385,7 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
 
             try
             {
-                category = SonarrSettings.Categories.Single(x => x.Id == request.CategoryId);
+                category = SonarrSettings.Categories.Concat(SonarrSettings.AnimeCategories).Single(x => x.Id == request.CategoryId);
             }
             catch
             {

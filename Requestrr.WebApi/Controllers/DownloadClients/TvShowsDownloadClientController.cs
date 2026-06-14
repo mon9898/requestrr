@@ -101,6 +101,17 @@ namespace Requestrr.WebApi.Controllers.DownloadClients
                         UseSeasonFolders = x.UseSeasonFolders,
                         SeriesType = x.SeriesType,
                     }).ToArray(),
+                    AnimeCategories = _downloadClientsSettings.Sonarr.AnimeCategories.Select(x => new SonarrSettingsCategory
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                        LanguageId = x.LanguageId,
+                        ProfileId = x.ProfileId,
+                        RootFolder = x.RootFolder,
+                        Tags = x.Tags,
+                        UseSeasonFolders = x.UseSeasonFolders,
+                        SeriesType = x.SeriesType,
+                    }).ToArray(),
                     UseSSL = _downloadClientsSettings.Sonarr.UseSSL,
                     SearchNewRequests = _downloadClientsSettings.Sonarr.SearchNewRequests,
                     MonitorNewRequests = _downloadClientsSettings.Sonarr.MonitorNewRequests,

@@ -26,11 +26,16 @@ namespace Requestrr.WebApi.RequestrrBot.ChatClients.Discord
                 TvShowDownloadClientConfigurationHash = ComputeTvClientConfigurationHashCode(settings),
                 MusicDownloadClient = settings.Music.Client,
                 MusicDownloadClientConfigurationHash = ComputeMusicClientConfigurationHashCode(settings),
+                AnimeDownloadClient = (string)(settings.ChatClients.Discord.AnimeDownloadClient) ?? string.Empty,
+                AnimeDownloadClientConfigurationHash = ComputeAnimeClientConfigurationHashCode(settings),
                 StatusMessage = settings.ChatClients.Discord.StatusMessage,
                 MonitoredChannels = settings.ChatClients.Discord.MonitoredChannels.ToObject<string[]>(),
                 TvShowRoles = settings.ChatClients.Discord.TvShowRoles.ToObject<string[]>(),
                 MovieRoles = settings.ChatClients.Discord.MovieRoles.ToObject<string[]>(),
                 MusicRoles = settings.ChatClients.Discord.MusicRoles.ToObject<string[]>(),
+                AnimeRoles = settings.ChatClients.Discord.AnimeRoles != null
+                    ? settings.ChatClients.Discord.AnimeRoles.ToObject<string[]>()
+                    : Array.Empty<string>(),
                 ClientID = settings.ChatClients.Discord.ClientId,
                 EnableRequestsThroughDirectMessages = settings.ChatClients.Discord.EnableRequestsThroughDirectMessages,
                 AutomaticallyNotifyRequesters = settings.ChatClients.Discord.AutomaticallyNotifyRequesters,
@@ -147,6 +152,30 @@ namespace Requestrr.WebApi.RequestrrBot.ChatClients.Discord
                 hash.Add(clientSettings.ApiKey);
                 hash.Add(clientSettings.UseSSL);
                 hash.Add(clientSettings.Version);
+            }
+
+            return hash.ToHashCode();
+        }
+
+        public int ComputeAnimeClientConfigurationHashCode(dynamic settings)
+        {
+            HashCode hash = new HashCode();
+
+            string animeClient = (string)(settings.ChatClients.Discord.AnimeDownloadClient) ?? string.Empty;
+            if (animeClient == DownloadClient.Sonarr)
+            {
+                var clientSettings = new SonarrSettingsProvider().Provide();
+
+                hash.Add(clientSettings.AnimeCategories.Select(x => x.Name).GetSequenceHashCode());
+                hash.Add(clientSettings.Hostname);
+                hash.Add(clientSettings.Port);
+                hash.Add(clientSettings.ApiKey);
+                hash.Add(clientSettings.UseSSL);
+                hash.Add(clientSettings.Version);
+            }
+            else
+            {
+                hash.Add(DownloadClient.Disabled);
             }
 
             return hash.ToHashCode();

@@ -188,11 +188,26 @@ namespace Requestrr.WebApi.Controllers.DownloadClients
                     SeriesType = x.SeriesType
                 }).ToArray());
 
+                settings.DownloadClients.Sonarr.AnimeCategories = JToken.FromObject((sonarrSettings.AnimeCategories ?? Array.Empty<SonarrSettingsCategory>()).Select(x => new SonarrCategory
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    ProfileId = x.ProfileId,
+                    RootFolder = x.RootFolder,
+                    Tags = x.Tags,
+                    LanguageId = x.LanguageId,
+                    UseSeasonFolders = x.UseSeasonFolders,
+                    SeriesType = x.SeriesType
+                }).ToArray());
+
                 settings.DownloadClients.Sonarr.SearchNewRequests = sonarrSettings.SearchNewRequests;
                 settings.DownloadClients.Sonarr.MonitorNewRequests = sonarrSettings.MonitorNewRequests;
 
                 settings.DownloadClients.Sonarr.UseSSL = sonarrSettings.UseSSL;
                 settings.DownloadClients.Sonarr.Version = sonarrSettings.Version;
+
+                var hasAnimeCategories = sonarrSettings.AnimeCategories != null && sonarrSettings.AnimeCategories.Length > 0;
+                settings.ChatClients.Discord.AnimeDownloadClient = hasAnimeCategories ? "Sonarr" : string.Empty;
 
                 SetTvShowSettings(tvSettings, settings);
             });

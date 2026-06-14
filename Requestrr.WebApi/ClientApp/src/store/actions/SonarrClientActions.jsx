@@ -93,6 +93,26 @@ export function addSonarrCategory(category) {
     };
 };
 
+export function addSonarrAnimeCategory(category) {
+    return (dispatch, getState) => {
+        const state = getState();
+
+        var animeCategories = [...state.tvShows.sonarr.animeCategories];
+        animeCategories.push(category);
+
+        var sonarr = {
+            ...state.tvShows.sonarr,
+            animeCategories: animeCategories,
+        };
+
+        dispatch(setSonarrClient({ sonarr: sonarr }));
+
+        return new Promise((resolve, reject) => {
+            return { ok: false };
+        });
+    };
+};
+
 export function removeSonarrCategory(categoryId) {
     return (dispatch, getState) => {
         const state = getState();
@@ -108,6 +128,26 @@ export function removeSonarrCategory(categoryId) {
         dispatch(setSonarrClient({
             sonarr: sonarr
         }));
+
+        return new Promise((resolve, reject) => {
+            return { ok: false };
+        });
+    };
+};
+
+export function removeSonarrAnimeCategory(categoryId) {
+    return (dispatch, getState) => {
+        const state = getState();
+
+        var animeCategories = [...state.tvShows.sonarr.animeCategories];
+        animeCategories = animeCategories.filter(x => x.id !== categoryId);
+
+        var sonarr = {
+            ...state.tvShows.sonarr,
+            animeCategories: animeCategories,
+        };
+
+        dispatch(setSonarrClient({ sonarr: sonarr }));
 
         return new Promise((resolve, reject) => {
             return { ok: false };
@@ -177,6 +217,55 @@ export function setSonarrCategories(categories) {
         dispatch(setSonarrClient({
             sonarr: sonarr
         }));
+
+        return new Promise((resolve, reject) => {
+            return { ok: false };
+        });
+    };
+};
+
+export function setSonarrAnimeCategory(categoryId, field, data) {
+    return (dispatch, getState) => {
+        const state = getState();
+
+        var animeCategories = [...state.tvShows.sonarr.animeCategories];
+
+        for (let index = 0; index < animeCategories.length; index++) {
+            if (animeCategories[index].id === categoryId) {
+                var category = { ...animeCategories[index] };
+
+                if (field === "name") {
+                    category.name = data;
+                }
+                else if (field === "languageId") {
+                    category.languageId = data;
+                }
+                else if (field === "profileId") {
+                    category.profileId = data;
+                }
+                else if (field === "rootFolder") {
+                    category.rootFolder = data;
+                }
+                else if (field === "tags") {
+                    category.tags = state.tvShows.sonarr.tags.map(x => x.id).filter(x => data.includes(x));
+                }
+                else if (field === "seriesType") {
+                    category.seriesType = data;
+                }
+                else if (field === "useSeasonFolders") {
+                    category.useSeasonFolders = data;
+                }
+
+                animeCategories[index] = category;
+            }
+        }
+
+        var sonarr = {
+            ...state.tvShows.sonarr,
+            animeCategories: animeCategories,
+        };
+
+        dispatch(setSonarrClient({ sonarr: sonarr }));
 
         return new Promise((resolve, reject) => {
             return { ok: false };
@@ -480,6 +569,7 @@ export function saveSonarrClient(saveModel) {
                 'Port': Number(saveModel.sonarr.port),
                 'ApiKey': saveModel.sonarr.apiKey,
                 'Categories': state.tvShows.sonarr.categories,
+                'AnimeCategories': state.tvShows.sonarr.animeCategories,
                 'UseSSL': saveModel.sonarr.useSSL,
                 'SearchNewRequests': saveModel.sonarr.searchNewRequests,
                 'MonitorNewRequests': saveModel.sonarr.monitorNewRequests,
@@ -497,6 +587,7 @@ export function saveSonarrClient(saveModel) {
                         port: saveModel.sonarr.port,
                         apiKey: saveModel.sonarr.apiKey,
                         categories: state.tvShows.sonarr.categories,
+                        animeCategories: state.tvShows.sonarr.animeCategories,
                         searchNewRequests: saveModel.sonarr.searchNewRequests,
                         monitorNewRequests: saveModel.sonarr.monitorNewRequests,
                         useSSL: saveModel.sonarr.useSSL,

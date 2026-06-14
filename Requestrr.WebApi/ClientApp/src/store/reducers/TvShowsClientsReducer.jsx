@@ -37,6 +37,7 @@ export default function TvShowsClientsReducer(state = {}, action) {
         port: action.payload.sonarr.port,
         apiKey: action.payload.sonarr.apiKey,
         categories: action.payload.sonarr.categories,
+        animeCategories: action.payload.sonarr.animeCategories || [],
         searchNewRequests: action.payload.sonarr.searchNewRequests,
         monitorNewRequests: action.payload.sonarr.monitorNewRequests,
         useSSL: action.payload.sonarr.useSSL,

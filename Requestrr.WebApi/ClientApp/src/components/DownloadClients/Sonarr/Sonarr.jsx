@@ -9,6 +9,7 @@ import ValidatedTextbox from "../../Inputs/ValidatedTextbox";
 import Textbox from "../../Inputs/Textbox";
 import Dropdown from "../../Inputs/Dropdown";
 import SonarrCategoryList from "./SonarrCategoryList";
+import SonarrAnimeCategoryList from "./SonarrAnimeCategoryList";
 
 import {
   FormGroup,
@@ -57,10 +58,13 @@ function Sonarr(props) {
 
     let previousNames = prevState === undefined ? [] : prevState.settings.categories.map(x => x.name);
     let currentNames = reduxState.settings.categories.map(x => x.name);
+    let previousAnimeNames = prevState === undefined ? [] : (prevState.settings.animeCategories || []).map(x => x.name);
+    let currentAnimeNames = (reduxState.settings.animeCategories || []).map(x => x.name);
 
     if (!(prevState?.settings?.profiles?.length === reduxState.settings.profiles.length && prevState?.settings?.profiles?.reduce((a, b, i) => a && reduxState.settings.profiles[i], true))
       || !(prevState?.settings?.paths?.length === reduxState.settings.paths.length && prevState?.settings?.paths?.reduce((a, b, i) => a && reduxState.settings.paths[i], true))
-      || !(previousNames.length === currentNames.length && currentNames.every((value, index) => previousNames[index] === value))) {
+      || !(previousNames.length === currentNames.length && currentNames.every((value, index) => previousNames[index] === value))
+      || !(previousAnimeNames.length === currentAnimeNames.length && currentAnimeNames.every((value, index) => previousAnimeNames[index] === value))) {
       onValueChange();
     }
   });
@@ -90,6 +94,24 @@ function Sonarr(props) {
       let matchedMovie = reduxState.otherCategories.filter(x => x.toLowerCase() === value.toLowerCase());
 
       if (new Set(names).size !== names.length || matchedMovie.length > 0)
+        return false;
+    } else {
+      return false;
+    }
+
+    return true;
+  };
+
+  const validateAnimeCategoryName = (value) => {
+    if (!/\S/.test(value)) {
+      return false;
+    } else if (/^[\w-]{1,32}$/.test(value)) {
+      const animeNames = (reduxState.settings.animeCategories || []).map((x) => x.name);
+      const tvNames = reduxState.settings.categories.map((x) => x.name);
+      let matchedOther = reduxState.otherCategories.filter(x => x.toLowerCase() === value.toLowerCase());
+      let matchedTv = tvNames.filter(x => x.toLowerCase() === value.toLowerCase());
+
+      if (new Set(animeNames).size !== animeNames.length || matchedOther.length > 0 || matchedTv.length > 0)
         return false;
     } else {
       return false;
@@ -201,6 +223,7 @@ function Sonarr(props) {
       reduxState.settings.areProfilesValid &&
       reduxState.settings.arePathsValid &&
       reduxState.settings.categories.every((x) => validateCategoryName(x.name)) &&
+      (reduxState.settings.animeCategories || []).every((x) => validateAnimeCategoryName(x.name)) &&
       isLanguageValid
     );
   }
@@ -333,6 +356,7 @@ function Sonarr(props) {
         </Row>
       </div>
       <SonarrCategoryList isSubmitted={props.isSubmitted} isSaving={props.isSaving} apiVersion={apiVersion} canConnect={isHostnameValid && isPortValid && isApiKeyValid} />
+      <SonarrAnimeCategoryList isSubmitted={props.isSubmitted} isSaving={props.isSaving} apiVersion={apiVersion} canConnect={isHostnameValid && isPortValid && isApiKeyValid} />
       <div>
         <h6 className="heading-small text-muted mt-4">
           Sonarr Requests Permissions Settings

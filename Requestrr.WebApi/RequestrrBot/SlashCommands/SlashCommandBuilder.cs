@@ -27,7 +27,7 @@ namespace Requestrr.WebApi.RequestrrBot
     {
         public enum CommandType
         {
-            Misc, Movie, Tv, IssueMovie, IssueTv, Music
+            Misc, Movie, Tv, IssueMovie, IssueTv, Music, Anime
         }
 
         private static Dictionary<CommandType, List<string>> _commandList = new Dictionary<CommandType, List<string>>();
@@ -107,6 +107,7 @@ namespace Requestrr.WebApi.RequestrrBot
                 { CommandType.IssueMovie, new List<string>() },
                 { CommandType.IssueTv, new List<string>() },
                 { CommandType.Music, new List<string>() },
+                { CommandType.Anime, new List<string>() },
                 { CommandType.Misc, new List<string>() }
             };
             var code = File.ReadAllText(Program.CombindPath("SlashCommands.txt"));
@@ -133,6 +134,13 @@ namespace Requestrr.WebApi.RequestrrBot
             code = code.Replace("[REQUEST_MUSIC_ARTIST_OPTION_NAME]", Language.Current.DiscordCommandMusicRequestArtistOptionName);
             code = code.Replace("[REQUEST_MUSIC_ARTIST_OPTION_DESCRIPTION]", Language.Current.DiscordCommandMusicRequestArtistOptionDescription);
 
+            code = code.Replace("[REQUEST_ANIME_TITLE_DESCRIPTION]", "Search for an anime by title");
+            code = code.Replace("[REQUEST_ANIME_TITLE_OPTION_NAME]", "title");
+            code = code.Replace("[REQUEST_ANIME_TITLE_OPTION_DESCRIPTION]", "Title of the anime");
+            code = code.Replace("[REQUEST_ANIME_TVDB_DESCRIPTION]", "Search for an anime by TVDB ID");
+            code = code.Replace("[REQUEST_ANIME_TVDB_OPTION_NAME]", "tvdbid");
+            code = code.Replace("[REQUEST_ANIME_TVDB_OPTION_DESCRIPTION]", "TVDB ID of the anime");
+
 
             code = code.Replace("[REQUEST_PING_NAME]", Language.Current.DiscordCommandPingRequestName);
             code = code.Replace("[REQUEST_PING_DESCRIPTION]", Language.Current.DiscordCommandPingRequestDescription);
@@ -142,6 +150,7 @@ namespace Requestrr.WebApi.RequestrrBot
             code = code.Replace("[REQUIRED_MOVIE_ROLE_IDS]", string.Join(",", settings.MovieRoles.Select(x => $"{x}UL")));
             code = code.Replace("[REQUIRED_TV_ROLE_IDS]", string.Join(",", settings.TvShowRoles.Select(x => $"{x}UL")));
             code = code.Replace("[REQUIRED_MUSIC_ROLE_IDS]", string.Join(",", settings.MusicRoles.Select(x => $"{x}UL")));
+            code = code.Replace("[REQUIRED_ANIME_ROLE_IDS]", string.Join(",", (settings.AnimeRoles ?? Array.Empty<string>()).Select(x => $"{x}UL")));
             code = code.Replace("[REQUIRED_CHANNEL_IDS]", string.Join(",", settings.MonitoredChannels.Select(x => $"{x}UL")));
 
 
@@ -258,6 +267,18 @@ namespace Requestrr.WebApi.RequestrrBot
                 else // if (settings.MusicDownloadClient == DownloadClient.Lidarr) //Currently only Lidarr
                 {
                     code = GenerateMusicCategories(lidarrSettings.Categories.Select(x => new Category { Id = x.Id, Name = x.Name }).ToArray(), code, _commandList[CommandType.Music], request);
+                }
+
+                if (settings.AnimeDownloadClient == DownloadClient.Disabled || settings.AnimeDownloadClient == null || !sonarrSettings.AnimeCategories.Any())
+                {
+                    var beginIndex = code.IndexOf("[ANIME_COMMAND_START]");
+                    var endIndex = code.IndexOf("[ANIME_COMMAND_END]") + "[ANIME_COMMAND_END]".Length;
+                    code = code.Replace(code.Substring(beginIndex, endIndex - beginIndex), string.Empty);
+                    _commandList.Remove(CommandType.Anime);
+                }
+                else
+                {
+                    code = GenerateAnimeCategories(sonarrSettings.AnimeCategories.Select(x => new Category { Id = x.Id, Name = x.Name }).ToArray(), code, _commandList[CommandType.Anime], request);
                 }
 
                 code = code.Replace("[REQUEST_COMMAND_START]", string.Empty);
@@ -416,6 +437,20 @@ namespace Requestrr.WebApi.RequestrrBot
             return GenerateCategories(start, end, dbStart, dbEnd, categoryId, slashName, slashDbName, dbPrefix, categories, code, commandList, slashCommand);
         }
 
+
+        private static string GenerateAnimeCategories(Category[] categories, string code, List<string> commandList, string slashCommand)
+        {
+            string start = "[ANIME_COMMAND_START]";
+            string end = "[ANIME_COMMAND_END]";
+            string categoryId = "[ANIME_CATEGORY_ID]";
+            string slashName = "[REQUEST_ANIME_TITLE_NAME]";
+
+            string dbStart = "[ANIMETVDB_COMMAND_START]";
+            string dbEnd = "[ANIMETVDB_COMMAND_END]";
+            string slashDbName = "[REQUEST_ANIME_TVDB_NAME]";
+
+            return GenerateCategories(start, end, dbStart, dbEnd, categoryId, slashName, slashDbName, string.Empty, categories, code, commandList, slashCommand);
+        }
 
         private static string GenerateMusicCategories(Category[] categories, string code, List<string> commandList, string slashCommand)
         {

@@ -9,6 +9,7 @@ namespace Requestrr.WebApi.RequestrrBot.DownloadClients.Sonarr
         public string ApiKey { get; set; }
         public string BaseUrl { get; set; }
         public SonarrCategory[] Categories { get; set; } = Array.Empty<SonarrCategory>();
+        public SonarrCategory[] AnimeCategories { get; set; } = Array.Empty<SonarrCategory>();
         public bool SearchNewRequests { get; set; }
         public bool MonitorNewRequests { get; set; }
         public bool UseSSL { get; set; }

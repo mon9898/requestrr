@@ -27,6 +27,7 @@ using Requestrr.WebApi.RequestrrBot.Notifications.Movies;
 using Requestrr.WebApi.RequestrrBot.Notifications.Music;
 using Requestrr.WebApi.RequestrrBot.Notifications.TvShows;
 using Requestrr.WebApi.RequestrrBot.TvShows;
+using Requestrr.WebApi.RequestrrBot.Anime;
 
 namespace Requestrr.WebApi.RequestrrBot
 {
@@ -44,6 +45,7 @@ namespace Requestrr.WebApi.RequestrrBot
         private MovieWorkflowFactory _movieWorkflowFactory;
         private TvShowWorkflowFactory _tvShowWorkflowFactory;
         private MusicWorkflowFactory _musicWorkflowFactory;
+        private AnimeWorkflowFactory _animeWorkflowFactory;
         private MovieNotificationsRepository _movieNotificationRepository = new MovieNotificationsRepository();
         private TvShowNotificationsRepository _tvShowNotificationRepository = new TvShowNotificationsRepository();
         private MusicNotificationsRepository _musicNotificationRepository = new MusicNotificationsRepository();
@@ -74,6 +76,7 @@ namespace Requestrr.WebApi.RequestrrBot
             _movieWorkflowFactory = new MovieWorkflowFactory(_discordSettingsProvider, _movieNotificationRepository, _overseerrClient, _ombiDownloadClient, _radarrDownloadClient);
             _tvShowWorkflowFactory = new TvShowWorkflowFactory(serviceProvider.Get<TvShowsSettingsProvider>(), _discordSettingsProvider, _tvShowNotificationRepository, _overseerrClient, _ombiDownloadClient, _sonarrDownloadClient);
             _musicWorkflowFactory = new MusicWorkflowFactory(_discordSettingsProvider, _musicNotificationRepository, _lidarrDownloadClient);
+            _animeWorkflowFactory = new AnimeWorkflowFactory(serviceProvider.Get<TvShowsSettingsProvider>(), _discordSettingsProvider, _tvShowNotificationRepository, _sonarrDownloadClient);
         }
 
         public async void Start()
@@ -461,6 +464,21 @@ namespace Requestrr.WebApi.RequestrrBot
                         await CreateTvShowNotificationWorkflow(e)
                             .AddNotificationAsync(userId, tvDbId, seasonType, int.Parse(seasonNumber));
                     }
+                    else if (e.Id.ToLower().StartsWith("ars") || e.Id.ToLower().StartsWith("ass") || e.Id.ToLower().StartsWith("arc"))
+                    {
+                        await HandleAnimeRequestAsync(e);
+                    }
+                    else if (e.Id.ToLower().StartsWith("anr"))
+                    {
+                        var splitValues = e.Id.Split("/").Skip(1).ToArray();
+                        var userId = splitValues[0];
+                        var tvDbId = int.Parse(splitValues[1]);
+                        var seasonType = splitValues[2];
+                        var seasonNumber = splitValues[3];
+
+                        await CreateAnimeNotificationWorkflow(e)
+                            .AddNotificationAsync(userId, tvDbId, seasonType, int.Parse(seasonNumber));
+                    }
                     else if (e.Id.ToLower().StartsWith("mur"))
                     {
                         await HandleMusicRequestAsync(e);
@@ -846,6 +864,51 @@ namespace Requestrr.WebApi.RequestrrBot
         {
             return _tvShowWorkflowFactory
                 .CreateNotificationWorkflow(e.Interaction);
+        }
+
+        private async Task HandleAnimeRequestAsync(ComponentInteractionCreateEventArgs e)
+        {
+            if (e.Id.ToLower().StartsWith("ars"))
+            {
+                if (e.Values != null && e.Values.Any())
+                {
+                    await CreateAnimeRequestWorkFlow(e, int.Parse(e.Values.Single().Split("/").First()))
+                        .HandleTvShowSelectionAsync(int.Parse(e.Values.Single().Split("/").Last()));
+                }
+            }
+            else if (e.Id.ToLower().StartsWith("ass"))
+            {
+                if (e.Values != null && e.Values.Any())
+                {
+                    var splitValues = e.Values.Single().Split("/");
+                    var categoryId = int.Parse(splitValues[0]);
+                    var tvDbId = int.Parse(splitValues[1]);
+                    var seasonNumber = int.Parse(splitValues[2]);
+
+                    await CreateAnimeRequestWorkFlow(e, categoryId)
+                        .HandleSeasonSelectionAsync(tvDbId, seasonNumber);
+                }
+            }
+            else if (e.Id.ToLower().StartsWith("arc"))
+            {
+                var splitValues = e.Id.Split("/").Skip(2).ToArray();
+                var categoryId = int.Parse(splitValues[0]);
+                var tvDbId = int.Parse(splitValues[1]);
+                var seasonNumber = int.Parse(splitValues[2]);
+
+                await CreateAnimeRequestWorkFlow(e, categoryId)
+                    .RequestSeasonSelectionAsync(tvDbId, seasonNumber);
+            }
+        }
+
+        private TvShowRequestingWorkflow CreateAnimeRequestWorkFlow(ComponentInteractionCreateEventArgs e, int categoryId)
+        {
+            return _animeWorkflowFactory.CreateRequestingWorkflow(e.Interaction, categoryId);
+        }
+
+        private ITvShowNotificationWorkflow CreateAnimeNotificationWorkflow(ComponentInteractionCreateEventArgs e)
+        {
+            return _animeWorkflowFactory.CreateNotificationWorkflow(e.Interaction);
         }
     }
 }

@@ -13,6 +13,9 @@
                 Port = (int)settings.DownloadClients.Sonarr.Port,
                 ApiKey = settings.DownloadClients.Sonarr.ApiKey,
                 Categories =  settings.DownloadClients.Sonarr.Categories.ToObject<SonarrCategory[]>(),
+                AnimeCategories = settings.DownloadClients.Sonarr.AnimeCategories != null
+                    ? settings.DownloadClients.Sonarr.AnimeCategories.ToObject<SonarrCategory[]>()
+                    : Array.Empty<SonarrCategory>(),
                 SearchNewRequests  = settings.DownloadClients.Sonarr.SearchNewRequests,
                 MonitorNewRequests  = settings.DownloadClients.Sonarr.MonitorNewRequests,
                 UseSSL = (bool)settings.DownloadClients.Sonarr.UseSSL,

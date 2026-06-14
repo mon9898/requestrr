@@ -160,6 +160,39 @@ namespace Requestrr.WebApi.Controllers.DownloadClients.Sonarr
                 return BadRequest($"Invalid categorie names, make sure they only contain alphanumeric characters, dashes and underscores. (No spaces, etc)");
             }
 
+            var animeCategories = model.AnimeCategories ?? Array.Empty<SonarrSettingsCategory>();
+
+            if (animeCategories.Any(x => string.IsNullOrWhiteSpace(x.Name)))
+            {
+                return BadRequest($"An anime category name is required.");
+            }
+
+            foreach (var category in animeCategories)
+            {
+                category.Name = category.Name.Trim();
+            }
+
+            if (animeCategories.Any() && new HashSet<string>(animeCategories.Select(x => x.Name.ToLower())).Count != animeCategories.Length)
+            {
+                return BadRequest($"All anime categories must have different names.");
+            }
+
+            if (animeCategories.Any() && new HashSet<int>(animeCategories.Select(x => x.Id)).Count != animeCategories.Length)
+            {
+                return BadRequest($"All anime categories must have different ids.");
+            }
+
+            if (animeCategories.Any(x => !Regex.IsMatch(x.Name, @"^[\w-]{1,32}$")))
+            {
+                return BadRequest($"Invalid anime category names, make sure they only contain alphanumeric characters, dashes and underscores. (No spaces, etc)");
+            }
+
+            var allCategoryNames = model.Categories.Select(x => x.Name.ToLower()).Concat(animeCategories.Select(x => x.Name.ToLower())).ToList();
+            if (new HashSet<string>(allCategoryNames).Count != allCategoryNames.Count)
+            {
+                return BadRequest($"TV and anime categories must all have different names.");
+            }
+
             var sonarrSetting = new SonarrSettingsModel
             {
                 Hostname = model.Hostname.Trim(),
@@ -167,6 +200,7 @@ namespace Requestrr.WebApi.Controllers.DownloadClients.Sonarr
                 ApiKey = model.ApiKey.Trim(),
                 BaseUrl = model.BaseUrl.Trim(),
                 Categories = model.Categories,
+                AnimeCategories = animeCategories,
                 SearchNewRequests = model.SearchNewRequests,
                 MonitorNewRequests = model.MonitorNewRequests,
                 UseSSL = model.UseSSL,

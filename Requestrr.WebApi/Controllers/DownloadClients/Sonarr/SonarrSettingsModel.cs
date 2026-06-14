@@ -5,6 +5,7 @@ namespace Requestrr.WebApi.Controllers.DownloadClients.Sonarr
     public class SonarrSettingsModel : TestSonarrSettingsModel
     {
         public SonarrSettingsCategory[] Categories { get; set; } = Array.Empty<SonarrSettingsCategory>();
+        public SonarrSettingsCategory[] AnimeCategories { get; set; } = Array.Empty<SonarrSettingsCategory>();
         public bool SearchNewRequests { get; set; }
         public bool MonitorNewRequests { get; set; }
     }
