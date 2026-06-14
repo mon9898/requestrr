@@ -1,4 +1,5 @@
-﻿using Requestrr.WebApi.config;
+﻿using System;
+using Requestrr.WebApi.config;
 using Requestrr.WebApi.RequestrrBot;
 
 namespace Requestrr.WebApi.Controllers.ChatClients
@@ -18,6 +19,9 @@ namespace Requestrr.WebApi.Controllers.ChatClients
                 TvShowRoles = settings.ChatClients.Discord.TvShowRoles.ToObject<string[]>(),
                 MovieRoles = settings.ChatClients.Discord.MovieRoles.ToObject<string[]>(),
                 MusicRoles = settings.ChatClients.Discord.MusicRoles.ToObject<string[]>(),
+                AnimeRoles = settings.ChatClients.Discord.AnimeRoles != null
+                    ? settings.ChatClients.Discord.AnimeRoles.ToObject<string[]>()
+                    : Array.Empty<string>(),
                 EnableRequestsThroughDirectMessages = (bool)settings.ChatClients.Discord.EnableRequestsThroughDirectMessages,
                 AutomaticallyNotifyRequesters = (bool)settings.ChatClients.Discord.AutomaticallyNotifyRequesters,
                 NotificationMode = (string)settings.ChatClients.Discord.NotificationMode,
